@@ -2,7 +2,7 @@ FROM golang:1.26.0-alpine AS builder
 RUN apk add --no-cache git make
 WORKDIR /src
 COPY go.mod go.sum ./
-RUN go mod download
+RUN go get github.com/openai/openai-go/v3@latest && go mod tidy && go mod download
 COPY . .
 RUN make build
 

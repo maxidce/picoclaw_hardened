@@ -9,7 +9,7 @@ WORKDIR /src
 
 # Cache dependencies
 COPY go.mod go.sum ./
-RUN go mod download
+RUN go get github.com/openai/openai-go/v3@latest && go mod tidy && go mod download
 
 # Copy source and build
 COPY . .

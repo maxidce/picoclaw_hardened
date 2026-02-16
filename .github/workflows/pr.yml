@@ -15,6 +15,9 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Sync OpenAI Go SDK to latest
+        run: make deps-openai-latest
+
       - name: Check formatting
         run: |
           make fmt
@@ -31,6 +34,10 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+
+      - name: Sync OpenAI Go SDK to latest
+        run: make deps-openai-latest
+
 
       - name: Run go generate
         run: go generate ./...
@@ -49,6 +56,9 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+
+      - name: Sync OpenAI Go SDK to latest
+        run: make deps-openai-latest
 
       - name: Run go generate
         run: go generate ./...

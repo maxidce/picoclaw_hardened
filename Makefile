@@ -16,6 +16,8 @@ LDFLAGS=-ldflags "-X main.version=$(VERSION) -X main.gitCommit=$(GIT_COMMIT) -X 
 # Go variables
 GO?=go
 GOFLAGS?=-v
+OPENAI_GO_MODULE?=github.com/openai/openai-go/v3
+OPENAI_GO_VERSION?=latest
 
 # Installation
 INSTALL_PREFIX?=$(HOME)/.local
@@ -134,6 +136,11 @@ fmt:
 ## deps: Update dependencies
 deps:
 	@$(GO) get -u ./...
+	@$(GO) mod tidy
+
+## deps-openai-latest: Pin OpenAI Go SDK to latest available version
+deps-openai-latest:
+	@$(GO) get $(OPENAI_GO_MODULE)@$(OPENAI_GO_VERSION)
 	@$(GO) mod tidy
 
 ## run: Build and run picoclaw

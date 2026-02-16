@@ -16,6 +16,9 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Sync OpenAI Go SDK to latest
+        run: make deps-openai-latest
+
       - name: fmt
         run: |
           make fmt

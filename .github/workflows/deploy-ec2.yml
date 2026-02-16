@@ -1,0 +1,50 @@
+name: Deploy to EC2 (no IAM)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy and run docker compose hardened
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+        run: |
+          ssh "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" 'bash -lc "
+            set -euo pipefail
+
+            # Ensure repo exists
+            if [ ! -d ~/picoclaw_hardened ]; then
+              git clone https://github.com/maxidce/picoclaw_hardened.git ~/picoclaw_hardened
+            fi
+
+            cd ~/picoclaw_hardened
+            git fetch --all
+            git reset --hard origin/main
+
+            # Write env file securely (not committed)
+            umask 077
+            cat > .env << EOF
+OPENAI_API_KEY='"$OPENAI_API_KEY"'
+OPENAI_MODEL='"${OPENAI_MODEL:-gpt-4.1-mini}"'
+EOF
+            chmod 600 .env
+
+            # Run hardened compose
+            docker compose -f docker-compose.hardened.yml --env-file .env up -d --build
+            docker compose -f docker-compose.hardened.yml ps
+          "'
